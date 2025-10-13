@@ -27,7 +27,7 @@ public class MainConsumer {
         log.info("Consuming record: {}, with headers: {}", record.value(), parseHeaders(record));
         var headers = KafkaContextUtils.extractContextHeader(record);
         var propagatedContext =
-            PropagatedContext.getOrEmpty().plus(new MdcPropagationContext(headers));
+            PropagatedContext.getOrEmpty().plus(new RequestIdContextElement(headers.get("x-request-id")));
 
         Mono.just(record)
             .contextWrite(ctx -> ReactorPropagation.addPropagatedContext(ctx, propagatedContext))
@@ -38,9 +38,8 @@ public class MainConsumer {
 
     private Mono<Void> sendSecondaryMessage(MainMessage mainMessage) {
         var message = new SecondaryMessage(mainMessage.name());
-        var requestId = PropagatedContext.get().find(MdcPropagationContext.class)
-            .get().state()
-            .get("x-request-id");
+        var requestId = PropagatedContext.get().find(RequestIdContextElement.class)
+            .get().requestId();
         return secondaryProducer.sendSecondaryKafkaMessage(UUID.randomUUID(), message, requestId)
             .then();
     }

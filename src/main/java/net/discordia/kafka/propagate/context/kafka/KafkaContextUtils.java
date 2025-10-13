@@ -26,6 +26,6 @@ public class KafkaContextUtils {
 
     public static <U, T> Map<String, String> parseHeaders(ConsumerRecord<U, T> record) {
         return Arrays.stream(record.headers().toArray())
-            .collect(Collectors.toMap(Header::key, h-> new String(h.value())));
+            .collect(Collectors.toMap(Header::key, h -> new String(h.value())));
     }
 }

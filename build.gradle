@@ -21,6 +21,7 @@ dependencies {
     implementation("jakarta.validation:jakarta.validation-api")
     implementation("io.micronaut.reactor:micronaut-reactor")
     implementation("io.micronaut.kafka:micronaut-kafka")
+    implementation("io.micrometer:context-propagation")
     compileOnly("io.micronaut:micronaut-http-client")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("ch.qos.logback:logback-classic")
