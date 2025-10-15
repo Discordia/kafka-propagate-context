@@ -26,14 +26,15 @@ public class MainConsumer {
     ) {
         log.info("Consuming record: {}, with headers: {}", record.value(), parseHeaders(record));
         var headers = KafkaContextUtils.extractContextHeader(record);
-        var propagatedContext =
-            PropagatedContext.getOrEmpty().plus(new RequestIdContextElement(headers.get("x-request-id")));
+        var propagatedContext = PropagatedContext.getOrEmpty()
+            .plus(new RequestIdContextElement(headers.get("x-request-id")));
 
-        Mono.just(record)
-            .contextWrite(ctx -> ReactorPropagation.addPropagatedContext(ctx, propagatedContext))
-            .map(ConsumerRecord::value)
-            .flatMap(this::sendSecondaryMessage)
-            .block();
+        try(var ignore = propagatedContext.propagate()) {
+            Mono.just(record)
+                .map(ConsumerRecord::value)
+                .flatMap(this::sendSecondaryMessage)
+                .block();
+        }
     }
 
     private Mono<Void> sendSecondaryMessage(MainMessage mainMessage) {
